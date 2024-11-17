@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <section className='my-8 container '>
     <div className="space-y-6">
-      <h1 className="text-2xl font-medium text-center">ほんやく & こんにゃく</h1>
+      <h1 className="text-2xl font-semibold text-center">Translation App</h1>
       <Textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
