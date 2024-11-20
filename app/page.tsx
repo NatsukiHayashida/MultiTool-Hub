@@ -11,7 +11,7 @@ import {
 export default function Home() {
   return (
     <main className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-8">多機能ツールへようこそ</h1>
+      <h1 className="text-2xl font-bold text-center mb-8">多機能ツールへようこそ</h1>
       <p className="text-center text-lg mb-6">以下の機能を選択してください</p>
       <div className="mt-6 grid gap-6 grid-cols-1 ">
       <Link href="/language-tools">
