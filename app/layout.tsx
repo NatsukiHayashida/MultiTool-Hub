@@ -9,8 +9,8 @@ import Header from "./components/header"; // Header コンポーネントを再�
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "多機能ツール",
-  description: "翻訳機能とスペーサー計算機能を搭載した多機能サイト",
+  title: "MultiToolHub",
+  description: "仕事で使うツールをまとめたサイトです。",
 };
 
 export default function RootLayout({

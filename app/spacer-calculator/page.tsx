@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { spacerStock } from "./spacerData"; // 在庫データをインポート
+import { spacerStock } from "./spacerData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,48 +9,68 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 export default function SpacerCalculator() {
   const [targetHeight, setTargetHeight] = useState<number>(0);
   const [results, setResults] = useState<number[][]>([]);
+  const [allResults, setAllResults] = useState<number[][]>([]);
   const [isApproximation, setIsApproximation] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   function findCombinations(spacerStock: number[], targetHeight: number) {
-    const results: number[][] = [];
+    const allResults: number[][] = [];
     let closestSum = 0;
     let closestCombination: number[] = [];
 
-    const combinations = (arr: number[], k: number): number[][] => {
-      if (k === 0) return [[]];
-      if (arr.length === 0) return [];
-      const [first, ...rest] = arr;
-      const includeFirst = combinations(rest, k - 1).map((combo) => [first, ...combo]);
-      const excludeFirst = combinations(rest, k);
-      return [...includeFirst, ...excludeFirst];
-    };
+    // スペーサーリストをソート（重複を排除しやすくするため）
+    const sortedStock = spacerStock.sort((a, b) => a - b);
 
-    for (let i = 1; i <= spacerStock.length; i++) {
-      const combos = combinations(spacerStock, i);
-      combos.forEach((combo) => {
-        const sum = combo.reduce((sum, val) => sum + val, 0);
-        if (sum === targetHeight) {
-          results.push(combo);
-        }
-        if (sum < targetHeight && sum > closestSum) {
-          closestSum = sum;
-          closestCombination = combo;
-        }
-      });
+    function dfs(index: number, current: number[], sum: number) {
+      if (sum > targetHeight) return;
+      if (sum > closestSum && sum <= targetHeight) {
+        closestSum = sum;
+        closestCombination = [...current];
+      }
+      if (sum === targetHeight) {
+        allResults.push([...current]);
+        return;
+      }
+      for (let i = index; i < sortedStock.length; i++) {
+        current.push(sortedStock[i]);
+        dfs(i + 1, current, sum + sortedStock[i]);
+        current.pop();
+      }
     }
 
-    if (results.length === 0 && closestCombination.length > 0) {
-      setIsApproximation(true);
-      return [closestCombination];
-    } else {
-      setIsApproximation(false);
-      return results;
+    dfs(0, [], 0);
+
+    setIsApproximation(allResults.length === 0);
+
+    // 重複した組み合わせを排除
+    const uniqueResults = Array.from(
+      new Set(allResults.map((combo) => combo.sort((a, b) => a - b).join(",")))
+    ).map((combo) => combo.split(",").map(Number));
+
+    // 最小スペーサー数で絞り込み
+    if (uniqueResults.length > 0) {
+      const minCount = Math.min(...uniqueResults.map((combo) => combo.length));
+      const filteredResults = uniqueResults.filter(
+        (combo) => combo.length === minCount
+      );
+      return { results: filteredResults, allResults: uniqueResults };
     }
+
+    return { results: [closestCombination], allResults: uniqueResults };
   }
 
   const handleCalculate = () => {
-    const combinations = findCombinations(spacerStock, targetHeight);
-    setResults(combinations);
+    if (targetHeight <= 0) {
+      setErrorMessage("正の数値を入力してください。");
+      return;
+    }
+    setErrorMessage("");
+    setIsLoading(true);
+    const { results, allResults } = findCombinations(spacerStock, targetHeight);
+    setResults(results);
+    setAllResults(allResults);
+    setIsLoading(false);
   };
 
   return (
@@ -70,33 +90,52 @@ export default function SpacerCalculator() {
               value={targetHeight || ""}
               onChange={(e) => setTargetHeight(Number(e.target.value))}
             />
-            <Button onClick={handleCalculate} className="w-full">
-              計算する
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            <Button onClick={handleCalculate} className="w-full" disabled={isLoading}>
+              {isLoading ? "計算中..." : "計算する"}
             </Button>
           </div>
         </CardContent>
       </Card>
       <div className="mt-6">
         {results.length > 0 ? (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>結果</CardTitle>
-              {isApproximation && (
-                <CardDescription className="text-red-500">
-                  近似値として計算されています。
-                </CardDescription>
-              )}
-            </CardHeader>
-            <CardContent>
-              <ul>
-                {results.map((combo, index) => (
-                  <li key={index}>
-                    組み合わせ {index + 1}: {combo.join("mm, ")}mm
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <div>
+            <Card className="shadow-lg mb-4">
+              <CardHeader>
+                <CardTitle>結果</CardTitle>
+                {isApproximation && (
+                  <CardDescription className="text-red-500">
+                    近似値として計算されています。
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-2">
+                  {allResults.length > results.length &&
+                    "以下は最小スペーサー数の組み合わせです。他にも組み合わせがあります。"}
+                </p>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-96">
+              {results.map((combo, index) => (
+                <Card key={index} className="shadow-md hover:shadow-lg transition">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-bold text-blue-600">
+                      {combo.reduce((sum, val) => sum + val, 0)} mm
+                    </CardTitle>
+                    <CardDescription>
+                      スペーサー数: {combo.length}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground text-lg ">
+                      {combo.join("mm + ")}mm
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ) : (
           <p className="text-center text-gray-500">結果がありません。</p>
         )}

@@ -13,7 +13,7 @@ export default function Home() {
     <main className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-8">多機能ツールへようこそ</h1>
       <p className="text-center text-lg mb-6">以下の機能を選択してください</p>
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-6 grid-cols-1 ">
       <Link href="/language-tools">
   <Card className="card transition-transform transform hover:scale-105">
     <CardHeader>
