@@ -91,3 +91,22 @@ body {
 .container > *:last-child {
   margin-bottom: 0;
 }
+
+/* カスタムCSS変数の設定 */
+:root {
+  --card-hover-bg: 210 40% 96.1%; /* ホバー時の背景色 */
+  --card-hover-text: 222.2 47.4% 11.2%; /* ホバー時のテキスト色 */
+}
+
+.dark {
+  --card-hover-bg: 222.2 47.4% 11.2%;
+  --card-hover-text: 210 40% 96.1%;
+}
+
+/* Shadcn/UI Card ホバー時のスタイル */
+.card:hover {
+  background-color: hsl(var(--card-hover-bg));
+  color: hsl(var(--card-hover-text));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+

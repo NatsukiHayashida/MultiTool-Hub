@@ -1,11 +1,15 @@
 import React from "react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import Link from "next/link"; // Linkをインポート
 
 export default function Header() {
   return (
     <div className="container flex h-24 items-center justify-between px-8">
-      <p className="text-lg font-semibold mt-4 p-0">Translate App</p>
+      <Link href="/" className="text-lg font-semibold mt-4 p-0 hover:underline">
+        MultiTool Hub
+      </Link>
       <ModeToggle />
     </div>
   );
 }
+

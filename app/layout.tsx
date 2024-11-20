@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
-import Header from "./components/header";
+import Header from "./components/header"; // Header コンポーネントを再利用
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My Translation App",
-  description: "A simple translation app built with Next.js and Shadcn/UI.",
+  title: "多機能ツール",
+  description: "翻訳機能とスペーサー計算機能を搭載した多機能サイト",
 };
 
 export default function RootLayout({
@@ -19,17 +19,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="jp">
-      <body className={cn(inter.className, 'min-h-dvh   ')} suppressHydrationWarning>
-      <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-        <Header />
-          {children}
-          </ThemeProvider>
+    <html lang="ja">
+      <body
+        className={cn(
+          inter.className,
+          "min-h-dvh bg-background text-foreground"
+        )}
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <main className="container mx-auto p-4">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
